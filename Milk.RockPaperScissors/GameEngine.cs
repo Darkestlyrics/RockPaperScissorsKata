@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Milk.RockPaperScissors
 {
     public class GameEngine
     {
-
         ///Version 1
         //public string Play(string playerMove, string computerMove)
         //{
@@ -103,32 +104,80 @@ namespace Milk.RockPaperScissors
         //    return res;
         //}
 
-        ///refactored v3
-        public string Play(string playerMove, string computerMove)
+        ///Refactored v3
+        //public string Play(string playerMove, string computerMove)
+        //{
+
+        //    if (playerMove.ToUpper() == computerMove.ToUpper())
+        //        return "Tie";
+        //    if (string.IsNullOrEmpty(playerMove) || string.IsNullOrEmpty(computerMove))
+        //        return "Invalid Input";
+        //    string res = "";
+        //    switch (playerMove.ToUpper())
+        //    {
+        //        case "SCISSORS":
+        //            res = $"Player { (computerMove.ToUpper() == "ROCK" ? "Loses" : "Wins")}";
+        //            break;
+
+        //        case "ROCK":
+        //            res = $"Player { (computerMove.ToUpper() == "PAPER" ? "Loses" : "Wins")}";
+
+        //            break;
+        //        case "PAPER":
+        //            res = $"Player { (computerMove.ToUpper() == "SCISSORS" ? "Loses" : "Wins")}";
+
+        //            break;
+        //    }
+        //    return res;
+        // }
+
+        ///Refactored v4
+        #region v4
+        private readonly List<WinningMove> _winningMoves = new List<WinningMove>()
         {
-
-            if (playerMove.ToUpper() == computerMove.ToUpper())
+            new WinningMove(GameMove.Rock, "Smashes", GameMove.Scissors),
+            new WinningMove(GameMove.Rock, "Smashes", GameMove.Lizard),
+            new WinningMove(GameMove.Scissors, "Cuts", GameMove.Paper),
+            new WinningMove(GameMove.Scissors, "Decapitates", GameMove.Lizard),
+            new WinningMove(GameMove.Paper, "Covers", GameMove.Rock),
+            new WinningMove(GameMove.Paper, "Disproves", GameMove.Spock),
+            new WinningMove(GameMove.Lizard, "Poisons", GameMove.Spock),
+            new WinningMove(GameMove.Lizard, "Eats", GameMove.Paper),
+            new WinningMove(GameMove.Spock, "Crushes", GameMove.Scissors),
+            new WinningMove(GameMove.Spock, "Crushes", GameMove.Lizard),
+        };
+        public string Play_Game(GameMove playerMove, GameMove computerMove)
+        {
+            WinningMove winningMove = null;
+            string result = "Player wins";
+            if (Is_Tie(playerMove, computerMove))
                 return "Tie";
-            if (string.IsNullOrEmpty(playerMove) || string.IsNullOrEmpty(computerMove))
-                return "Invalid Input";
-            string res = "";
-            switch (playerMove.ToUpper())
+            //This section will need refactoring
+            if (Is_Computer_Winner(computerMove, playerMove))
             {
-                case "SCISSORS":
-                    res = $"Player { (computerMove.ToUpper() == "ROCK" ? "Loses" : "Wins")}";
-                    break;
-
-                case "ROCK":
-                    res = $"Player { (computerMove.ToUpper() == "PAPER" ? "Loses" : "Wins")}";
-
-                    break;
-                case "PAPER":
-                    res = $"Player { (computerMove.ToUpper() == "SCISSORS" ? "Loses" : "Wins")}";
-
-                    break;
+                result = "Player Loses";
+                winningMove = Get_Winning_Move(computerMove, playerMove);
             }
-            return res;
+            else
+            {
+                winningMove = Get_Winning_Move(playerMove, computerMove);
+            }
+
+            return Get_Winner_Text(winningMove, result);
         }
+
+        private WinningMove Get_Winning_Move(GameMove move, GameMove oppositeMove) => _winningMoves.First(o => o.Move == move && o.OppositeMove == oppositeMove);
+
+        private bool Is_Computer_Winner(GameMove computer, GameMove player) =>
+            _winningMoves.Any(o => o.Move == computer && o.OppositeMove == player);
+
+        private string Get_Winner_Text(WinningMove move,string result)
+        {
+            return $"{result}: {move}";
+        }
+
+        private bool Is_Tie(GameMove playerMove, GameMove computerMove) => playerMove == computerMove;
+
+        #endregion
     }
 }
-//
